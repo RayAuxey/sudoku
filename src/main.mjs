@@ -64,11 +64,19 @@ const printGrid = (list) => {
 };
 
 let sudokuGrid = generateRandomGrid();
+const HEIGHT_THRESHOLD = 28;
 
 console.clear();
 
 const main = async () => {
   while (true) {
+    if (process.stdout.rows < 28) {
+      log(`Adjust terminal size for the game to fit
+      Current Height is ${process.stdout.rows}
+      Required is Height ${HEIGHT_THRESHOLD}`);
+      await waitForResize(HEIGHT_THRESHOLD, Infinity);
+    }
+    console.clear();
     log.clear();
     printGrid(sudokuGrid);
 
@@ -82,12 +90,23 @@ const main = async () => {
         }
       }
     }
-
-    console.clear();
   }
 };
 
 main();
+
+function waitForResize(min, max) {
+  return new Promise((resolve, _) => {
+    process.stdout.on("resize", () => {
+      const rows = process.stdout.rows;
+      // console.log("Current height is", rows);
+      if (rows >= min && rows <= max) {
+        resolve();
+        // process.stdout.off("resize", () => {});
+      }
+    });
+  });
+}
 
 function getInput(question) {
   return new Promise((resolve, _) => {
