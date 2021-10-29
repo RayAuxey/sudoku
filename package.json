@@ -2,9 +2,10 @@
   "name": "sudoku",
   "version": "0.1.0",
   "description": "",
-  "main": "main.js",
+  "main": "src/main.mjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/main.mjs"
   },
   "author": "",
   "license": "ISC",
