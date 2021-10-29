@@ -25,16 +25,30 @@ const generateRandomGrid = () => {
 
 const printGrid = (list) => {
   let output = "";
+
   for (let i = 0; i < list.length; i++) {
     if (i == 0) {
+      // Column Numbers
+      output += "  ";
+      for (let j = 0; j < list[i].length; j++)
+        output += colors.italic(colors.gray(`  ${j} `));
+      output += "\n";
+
+      output += "  ";
       for (let j = 0; j < list[i].length; j++) output += colors.green("+---");
       output += colors.green("+\n");
     }
+    // Row Numbers
+    output += colors.italic(colors.gray(`${i} `));
+
     for (let [j, item] of list[i].entries()) {
       output +=
         (j % 3 == 0 ? colors.green("| ") : colors.gray("| ")) + item + " ";
     }
     output += colors.green("|\n");
+
+    // Padding for row Number
+    output += "  ";
 
     for (let j = 0; j < list[i].length; j++) {
       output +=
