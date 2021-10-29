@@ -53,23 +53,27 @@ let sudokuGrid = generateRandomGrid();
 
 console.clear();
 
-while (true) {
-  log.clear();
-  printGrid(sudokuGrid);
+const main = async () => {
+  while (true) {
+    log.clear();
+    printGrid(sudokuGrid);
 
-  const row = await getInput("Specify row:   ");
-  if (isNumeric(row) && isBound(row, 0, 8)) {
-    const col = await getInput("Specify col:   ");
-    if (isNumeric(col) && isBound(col, 0, 8)) {
-      const value = await getInput("Specify value: ");
-      if (isNumeric(value) && isBound(value, 1, 9)) {
-        sudokuGrid[row][col] = value;
+    const row = await getInput("Specify row:   ");
+    if (isNumeric(row) && isBound(row, 0, 8)) {
+      const col = await getInput("Specify col:   ");
+      if (isNumeric(col) && isBound(col, 0, 8)) {
+        const value = await getInput("Specify value: ");
+        if (isNumeric(value) && isBound(value, 1, 9)) {
+          sudokuGrid[row][col] = value;
+        }
       }
     }
-  }
 
-  console.clear();
-}
+    console.clear();
+  }
+};
+
+main();
 
 function getInput(question) {
   return new Promise((resolve, _) => {
