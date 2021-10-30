@@ -18,8 +18,8 @@ $ node src/main.js
 
 ### 3. Features
 
-- [✅] Display a sudoku board.
-- [✅] Accept input from user.
+- [x] Display a sudoku board.
+- [x] Accept input from user.
 - [ ] Load an actual sudoku board.
 - [ ] Highlight errors.
 - [ ] Implement game logic.
