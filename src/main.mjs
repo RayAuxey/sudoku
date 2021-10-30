@@ -1,16 +1,6 @@
 import colors from "colors/safe.js";
-import readline from "readline";
 import { stdin as input, stdout as output } from "process";
-import logUpdate, { createLogUpdate } from "log-update";
-
-const rl = readline.createInterface({
-  input,
-  output,
-});
-
-const log = createLogUpdate(output, {
-  showCursor: true,
-});
+import EventEmitter from "events";
 
 const generateRandomGrid = () => {
   const output = [];
@@ -23,6 +13,20 @@ const generateRandomGrid = () => {
   return output;
 };
 
+const userInput = {
+  row: null,
+  col: null,
+  value: null,
+};
+
+const inputProxy = new Proxy(userInput, {
+  set: (target, key, value) => {
+    target[key] = value;
+    changeEmmiter.emit("inputChange");
+    return true;
+  },
+});
+
 const printGrid = (list) => {
   let output = "";
 
@@ -31,7 +35,11 @@ const printGrid = (list) => {
       // Column Numbers
       output += "  ";
       for (let j = 0; j < list[i].length; j++)
-        output += colors.italic(colors.gray(`  ${j} `));
+        output += colors.italic(
+          j === userInput.col
+            ? colors.bold(colors.green(`  ${j} `))
+            : colors.gray(`  ${j} `)
+        );
       output += "\n";
 
       output += "  ";
@@ -39,7 +47,11 @@ const printGrid = (list) => {
       output += colors.green("+\n");
     }
     // Row Numbers
-    output += colors.italic(colors.gray(`${i} `));
+    output += colors.italic(
+      i === userInput.row
+        ? colors.bold(colors.green(`${i} `))
+        : colors.gray(`${i} `)
+    );
 
     for (let [j, item] of list[i].entries()) {
       output +=
@@ -60,36 +72,108 @@ const printGrid = (list) => {
     output += colors.green("+\n");
   }
 
-  log(output);
+  console.log(output);
 };
 
 let sudokuGrid = generateRandomGrid();
-const HEIGHT_THRESHOLD = 28;
 
-console.clear();
+const HEIGHT_THRESHOLD = 28; // Terminal Rows Height
+
+const changeEmmiter = new EventEmitter();
+
+const nullifyInput = () => {
+  userInput.col = null;
+  userInput.row = null;
+  inputProxy.value = null;
+};
+
+input.setRawMode(true);
+input.setEncoding("utf-8");
+input.resume();
+
+input.on("data", (char) => {
+  if (char === "\u0003" || char === "q") {
+    process.exit();
+  }
+
+  if (char === "u") {
+    nullifyInput();
+  }
+
+  if (isNumeric(char) && isBound(char, 0, 9)) {
+    if (userInput.row === null && isBound(char, 0, 8)) {
+      inputProxy.row = +char;
+    } else if (
+      userInput.col === null &&
+      isBound(char, 0, 8) &&
+      userInput.row !== null
+    ) {
+      inputProxy.col = +char;
+    } else if (
+      userInput.value === null &&
+      isBound(char, 1, 9) &&
+      userInput.row !== null &&
+      userInput.col !== null
+    ) {
+      inputProxy.value = +char;
+      console.log(userInput);
+      changeEmmiter.emit("inputFinished");
+    }
+  }
+
+  // output.write(char);
+});
+
+changeEmmiter.addListener("inputFinished", () => {
+  const { row, col, value } = userInput;
+  sudokuGrid[row][col] = value;
+  nullifyInput();
+});
+
+const awaitChange = () => {
+  return new Promise((resolve) => {
+    changeEmmiter
+      .on("inputChange", () => {
+        resolve();
+      })
+      .off("inputChange", () => {});
+  });
+};
 
 const main = async () => {
+  console.clear();
   while (true) {
     if (process.stdout.rows < 28) {
-      log(`Adjust terminal size for the game to fit
+      console.log(`Adjust terminal size for the game to fit
       Current Height is ${process.stdout.rows}
       Required is Height ${HEIGHT_THRESHOLD}`);
       await waitForResize(HEIGHT_THRESHOLD, Infinity);
     }
     console.clear();
-    log.clear();
     printGrid(sudokuGrid);
 
-    const row = await getInput("Specify row:   ");
-    if (isNumeric(row) && isBound(row, 0, 8)) {
-      const col = await getInput("Specify col:   ");
-      if (isNumeric(col) && isBound(col, 0, 8)) {
-        const value = await getInput("Specify value: ");
-        if (isNumeric(value) && isBound(value, 1, 9)) {
-          sudokuGrid[row][col] = value;
-        }
+    let message = "";
+    if (userInput.row === null) {
+      message += `Please select a ${colors.green(
+        colors.bold("row")
+      )} (0 - 8)\n`;
+    } else {
+      if (userInput.col === null) {
+        message += `Please select a ${colors.green(
+          colors.bold("column")
+        )} (0 - 8)\n`;
+      } else if (userInput.value === null) {
+        message += `Please input a ${colors.green(
+          colors.bold("value")
+        )} (1 - 9)\n`;
       }
+      message += `Press ${colors.bold("u")} to undo selection\n`;
     }
+    message += `\nPress ${colors.bold("q")} to quit\n`;
+
+    console.log(message);
+
+    await awaitChange();
   }
 };
 
@@ -99,18 +183,10 @@ function waitForResize(min, max) {
   return new Promise((resolve, _) => {
     process.stdout.on("resize", () => {
       const rows = process.stdout.rows;
-      // console.log("Current height is", rows);
       if (rows >= min && rows <= max) {
         resolve();
-        // process.stdout.off("resize", () => {});
       }
     });
-  });
-}
-
-function getInput(question) {
-  return new Promise((resolve, _) => {
-    rl.question(question, (answer) => resolve(answer));
   });
 }
 
