@@ -6,16 +6,16 @@ const generateGridOutput = (grid, userInput) => {
   for (let i = 0; i < grid.length; i++) {
     if (i == 0) {
       // Column Numbers Top
-      if (userInput.row !== null /* show only when row is selected */) {
-        output += "  ";
-        for (let j = 0; j < grid[i].length; j++)
-          output += colors.italic(
-            j === userInput.col
-              ? colors.bold(colors.green(`  ${j} `))
-              : colors.gray(`  ${j} `)
-          );
-        output += "\n";
-      }
+      //   if (userInput.row !== null /* show only when row is selected */) {
+      output += "  ";
+      for (let j = 0; j < grid[i].length; j++)
+        output += colors.italic(
+          j === userInput.col
+            ? colors.bold(colors.green(`  ${j} `))
+            : colors.gray(`  ${j} `)
+        );
+      output += "\n";
+      //   }
 
       output += "  ";
       for (let j = 0; j < grid[i].length; j++) output += colors.green("+---");
@@ -29,9 +29,11 @@ const generateGridOutput = (grid, userInput) => {
         : colors.gray(`${i} `)
     );
 
+    // The Numbers in the grid
     for (let [j, item] of grid[i].entries()) {
       output +=
-        (j % 3 == 0 ? colors.green("| ") : colors.gray("| ")) + item + " ";
+        (j % 3 == 0 ? colors.green("|") : colors.gray("|")) +
+        highLightifSelected(` ${item} `, i, j, userInput);
     }
     output += colors.green("| ");
 
@@ -55,19 +57,27 @@ const generateGridOutput = (grid, userInput) => {
     output += colors.green("+\n");
   }
 
-  if (userInput.row !== null) {
-    output += "  ";
-    for (let j = 0; j < grid[0].length; j++)
-      output += colors.italic(
-        j === userInput.col
-          ? colors.bold(colors.green(`  ${j} `))
-          : colors.gray(`  ${j} `)
-      );
-    output += "\n";
-  }
+  // Column Numbers Bottom
+  //   if (userInput.row !== null) {
+  output += "  ";
+  for (let j = 0; j < grid[0].length; j++)
+    output += colors.italic(
+      j === userInput.col
+        ? colors.bold(colors.green(`  ${j} `))
+        : colors.gray(`  ${j} `)
+    );
+  output += "\n";
+  //   }
 
   return output;
 };
+
+function highLightifSelected(str, i, j, { row, col }) {
+  if (row === i && col === j) {
+    return colors.bgBlack(colors.green(colors.bold(str)));
+  }
+  return str;
+}
 
 const generateRandomGrid = () => {
   const output = [];
