@@ -5,21 +5,24 @@ const generateGridOutput = (grid, userInput) => {
 
   for (let i = 0; i < grid.length; i++) {
     if (i == 0) {
-      // Column Numbers
-      output += "  ";
-      for (let j = 0; j < grid[i].length; j++)
-        output += colors.italic(
-          j === userInput.col
-            ? colors.bold(colors.green(`  ${j} `))
-            : colors.gray(`  ${j} `)
-        );
-      output += "\n";
+      // Column Numbers Top
+      if (userInput.row !== null /* show only when row is selected */) {
+        output += "  ";
+        for (let j = 0; j < grid[i].length; j++)
+          output += colors.italic(
+            j === userInput.col
+              ? colors.bold(colors.green(`  ${j} `))
+              : colors.gray(`  ${j} `)
+          );
+        output += "\n";
+      }
 
       output += "  ";
       for (let j = 0; j < grid[i].length; j++) output += colors.green("+---");
       output += colors.green("+\n");
     }
-    // Row Numbers
+
+    // Row Number Right
     output += colors.italic(
       i === userInput.row
         ? colors.bold(colors.green(`${i} `))
@@ -30,7 +33,14 @@ const generateGridOutput = (grid, userInput) => {
       output +=
         (j % 3 == 0 ? colors.green("| ") : colors.gray("| ")) + item + " ";
     }
-    output += colors.green("|\n");
+    output += colors.green("| ");
+
+    // Row Number Left
+    output += colors.italic(
+      i === userInput.row
+        ? colors.bold(colors.green(`${i}\n`))
+        : colors.gray(`${i}\n`)
+    );
 
     // Padding for row Number
     output += "  ";
@@ -43,6 +53,17 @@ const generateGridOutput = (grid, userInput) => {
         ((i + 1) % 3 == 0 ? colors.green("---") : colors.gray("---"));
     }
     output += colors.green("+\n");
+  }
+
+  if (userInput.row !== null) {
+    output += "  ";
+    for (let j = 0; j < grid[0].length; j++)
+      output += colors.italic(
+        j === userInput.col
+          ? colors.bold(colors.green(`  ${j} `))
+          : colors.gray(`  ${j} `)
+      );
+    output += "\n";
   }
 
   return output;
