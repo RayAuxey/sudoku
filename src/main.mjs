@@ -78,11 +78,9 @@ const main = async () => {
 
   const awaitChange = () => {
     return new Promise((resolve) => {
-      changeEmmiter
-        .on("inputChange", () => {
-          resolve();
-        })
-        .off("inputChange", () => {});
+      changeEmmiter.once("inputChange", () => {
+        resolve();
+      });
     });
   };
 
