@@ -2,7 +2,7 @@ import colors from "colors/safe.js";
 import { stdin as input, stdout as output } from "process";
 import EventEmitter from "events";
 
-import { waitForResize, isNumeric, isBound } from "./utils/utils.js";
+import { waitForResize, isNumeric, isBound, sleep } from "./utils/utils.js";
 import { generateGridOutput, generateRandomGrid } from "./grid.js";
 
 const userInput = {
@@ -70,9 +70,10 @@ const main = async () => {
 
   const HEIGHT_THRESHOLD = 28; // Terminal Rows Height
 
-  changeEmmiter.addListener("inputFinished", () => {
+  changeEmmiter.addListener("inputFinished", async () => {
     const { row, col, value } = userInput;
     sudokuGrid[row][col] = value;
+    await sleep(500);
     nullifyInput();
   });
 

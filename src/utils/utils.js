@@ -23,8 +23,17 @@ function isBound(val, min, max) {
   return val >= min && val <= max;
 }
 
+function sleep(time) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, time);
+  });
+}
+
 module.exports = {
   waitForResize,
   isNumeric,
   isBound,
+  sleep,
 };
